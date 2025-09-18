@@ -84,13 +84,13 @@ Git
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/yourusername/sumitai-nihon-navi.git
+git clone https://github.com/nt-thuyr/sumitai-nihon-navi.git
 cd sumitai-nihon-navi
 ```
 
-2. **Install dependencies with pipenv**
+2. **Launch subshell in virtual environment**
 ```bash
-pipenv install
+pipenv shell
 ```
 
 3. **Install required packages**
