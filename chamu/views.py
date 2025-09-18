@@ -531,30 +531,38 @@ def get_municipality_info_from_wiki(municipality_name, prefecture_name):
 
 
 def get_municipality_info_via_api(municipality_name):
-    """
-    Sử dụng API của Wikipedia để tìm ảnh chính của bài viết.
-    """
+    """Lấy thumbnail Wikipedia cho tên thị trấn."""
     url = "https://ja.wikipedia.org/w/api.php"
     params = {
         "action": "query",
         "format": "json",
         "prop": "pageimages",
         "titles": municipality_name,
-        "pithumbsize": 600,  # Kích thước hình ảnh thu nhỏ mong muốn
+        "pithumbsize": 600,
         "redirects": 1
     }
-
+    headers = {
+        "User-Agent": "Mozilla/5.0 (compatible; SumitaiNihonBot/1.0; +https://github.com/nt-thuyr/sumitai-nihon-navi)"
+    }
     try:
-        response = requests.get(url, params=params)
-        data = response.json()
-        pages = data['query']['pages']
-        for page_id, page_data in pages.items():
-            if 'thumbnail' in page_data:
-                return page_data['thumbnail']['source']  # Trả về URL của ảnh chính
-    except requests.exceptions.RequestException as e:
+        resp = requests.get(url, params=params, timeout=5, headers=headers)
+        print(f"[DEBUG] Wikipedia API status: {resp.status_code}")
+        if resp.status_code != 200:
+            print(f"[DEBUG] Wikipedia API error: {resp.text[:300]}")
+            return None
+        try:
+            data = resp.json()
+        except Exception as e:
+            print(f"[DEBUG] Wikipedia API decode error: {e}")
+            print(f"[DEBUG] Wikipedia API raw: {resp.text[:300]}")
+            return None
+        pages = data.get('query', {}).get('pages', {})
+        for p in pages.values():
+            if "thumbnail" in p:
+                return p["thumbnail"]["source"]
+    except Exception as e:
         print(f"Error fetching data from Wikipedia API: {e}")
-
-    return None  # Trả về None nếu không tìm thấy ảnh
+    return None
 
 @require_GET
 def get_municipalities(request):
